@@ -51,6 +51,7 @@ flutter:
   uses-material-design: true
   assets:
     - images/
+    - assets/images/
     - assets/images/dog1.jpg
     - assets/images/dog2.jpg
     - assets/images/dog3.jpg

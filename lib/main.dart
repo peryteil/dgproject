@@ -7,6 +7,8 @@ import 'community_page.dart';
 import 'community_write_page.dart';
 import 'community_detail_page.dart';
 import 'community_edit_page.dart';
+import 'find_friend.dart';
+import 'exhibition_page.dart';
 
 
 void main() {
@@ -71,13 +73,13 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(), // ✅ 로그인 라우트 추가
         '/': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
-        '/find-friend': (context) => const FindFriendPage(),
-        '/exhibition': (context) => const ExhibitionPage(),
+        '/exhibition': (context) => const ExhibitionScreen(),
         '/community': (context) => const CommunityPage(),
         '/community/write': (context) => const CommunityWritePage(),
         '/community/detail': (context) => const CommunityDetailPage(),
         '/community/edit': (context) => const CommunityEditPage(),
         '/market': (context) => MarketPage(),
+        '/find': (context) => const FindFriendScreen(),
       },
     );
   }
@@ -281,7 +283,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               children: [
-                featureCard('🦴', '댕근 찾기', '산책 약속과 할 일 관리', '/find-friend'),
+                featureCard('🦴', '댕근 찾기', '산책 약속과 할 일 관리', '/find'),
                 featureCard('🎪', '박람회 정보', '예정된 박람회 정보', '/exhibition'),
                 featureCard('💬', '커뮤니티', '견주들과 소통', '/community'),
                 featureCard('🛒', '댕근마켓', '반려용품 거래', '/market'),
@@ -293,32 +295,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-
-class FindFriendPage extends StatelessWidget {
-  const FindFriendPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('댕근찾기')),
-      body: const Center(child: Text('여기는 산책 친구 찾기 페이지입니다')),
-    );
-  }
-}
-
-class ExhibitionPage extends StatelessWidget {
-  const ExhibitionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('박람회 정보')),
-      body: const Center(child: Text('여기는 박람회 정보 페이지입니다')),
-    );
-  }
-}
-
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
