@@ -25,20 +25,22 @@ class _LoginPageState extends State<LoginPage> {
       _loginError = null;
     });
 
-    // 더미 로그인 처리
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userEmail', _emailController.text.trim());
+    final enteredEmail = _emailController.text.trim();
+    final enteredPassword = _passwordController.text;
 
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/'); // 메인 페이지로 이동
-    } catch (e) {
+    final prefs = await SharedPreferences.getInstance();
+    final storedEmail = prefs.getString('userEmail');
+    final storedPassword = prefs.getString('password');
+
+    if (enteredEmail == storedEmail && enteredPassword == storedPassword) {
+      Navigator.pushReplacementNamed(context, '/');
+    } else {
       setState(() {
-        _loginError = '로그인에 실패했습니다.';
+        _loginError = '이메일 또는 비밀번호가 일치하지 않습니다.';
       });
-    } finally {
-      setState(() => _isLoading = false);
     }
+
+    setState(() => _isLoading = false);
   }
 
   @override

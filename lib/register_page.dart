@@ -18,17 +18,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _repeatPasswordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
   final TextEditingController _breedController = TextEditingController();
   final TextEditingController _personalityController = TextEditingController();
   final TextEditingController _petNameController = TextEditingController();
   final TextEditingController _petAgeController = TextEditingController();
 
-  String _gender = '남아';
   String _petGender = '남아';
   // XFile? _pickedImage;
 
@@ -48,24 +43,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('userEmail', _emailController.text.trim());
+      await prefs.setString('password', _passwordController.text);
       await prefs.setString('username', _usernameController.text.trim());
 
-      Future.delayed(const Duration(seconds: 1), () {
-        setState(() => _isLoading = false);
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('회원가입 완료'),
-            content: const Text('회원가입 정보가 저장되었습니다.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('확인'),
-              )
-            ],
-          ),
-        );
-      });
+      await Future.delayed(const Duration(seconds: 1)); // 등록 처리 완료 시점
+
+      if (!mounted) return;
+      // Navigator.pushReplacementNamed(context, '/'); // ✅ 홈으로 이동
+
+      // 혹은 로그인 페이지로 이동하고 싶다면:
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -101,23 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
               _buildTextField('비밀번호', _passwordController, obscure: true),
               _buildTextField('비밀번호 확인', _repeatPasswordController, obscure: true),
               _buildTextField('닉네임', _usernameController),
-              _buildTextField('전화번호', _phoneController, type: TextInputType.phone),
-              _buildTextField('주소', _addressController),
               _buildTextField('지역', _locationController),
-              _buildTextField('이름', _nameController),
-              _buildTextField('나이', _ageController, type: TextInputType.number),
-              DropdownButtonFormField(
-                value: _gender,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '성별',
-                ),
-                items: const [
-                  DropdownMenuItem(value: '남아', child: Text('남아')),
-                  DropdownMenuItem(value: '여아', child: Text('여아')),
-                ],
-                onChanged: (value) => setState(() => _gender = value!),
-              ),
               const SizedBox(height: 8),
               _buildTextField('반려견 이름', _petNameController),
               _buildTextField('반려견 나이', _petAgeController, type: TextInputType.number),

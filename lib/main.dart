@@ -1,9 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
+import 'market_page.dart';
+import 'register_page.dart';
+import 'community_page.dart';
+import 'community_write_page.dart';
+import 'community_detail_page.dart';
+import 'community_edit_page.dart';
+
 
 void main() {
   runApp(const MyApp());
+}
+
+class MyAppBarActions extends StatefulWidget {
+  const MyAppBarActions({super.key});
+
+  @override
+  State<MyAppBarActions> createState() => _MyAppBarActionsState();
+}
+
+class _MyAppBarActionsState extends State<MyAppBarActions> {
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userEmail = prefs.getString('userEmail');
+    setState(() {
+      _isLoggedIn = userEmail != null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (_isLoggedIn)
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: '로그아웃',
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('userEmail');
+              if (!context.mounted) return;
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            },
+          ),
+      ],
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -14,16 +66,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '댕근',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash', // ✅ 로그인 페이지를 첫 화면으로 설정
+      initialRoute: '/',
       routes: {
-        '/splash': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(), // ✅ 로그인 라우트 추가
         '/': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
         '/find-friend': (context) => const FindFriendPage(),
         '/exhibition': (context) => const ExhibitionPage(),
         '/community': (context) => const CommunityPage(),
-        '/market': (context) => const MarketPage(),
+        '/community/write': (context) => const CommunityWritePage(),
+        '/community/detail': (context) => const CommunityDetailPage(),
+        '/community/edit': (context) => const CommunityEditPage(),
+        '/market': (context) => MarketPage(),
       },
     );
   }
@@ -65,9 +119,9 @@ class _HomePageState extends State<HomePage> {
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
         topDogs = [
-          Dog(image: 'https://place-puppy.com/250x250', userName: '초코', petBreed: '푸들', petAge: 3),
-          Dog(image: 'https://place-puppy.com/251x251', userName: '복실이', petBreed: '말티즈', petAge: 2),
-          Dog(image: 'https://place-puppy.com/252x252', userName: '단추', petBreed: '시바견', petAge: 4),
+          Dog(image: 'assets/images/dog1.jpg', userName: '초코', petBreed: '포메라니안', petAge: 3),
+          Dog(image: 'assets/images/dog2.jpg', userName: '복실이', petBreed: '포메라니안', petAge: 2),
+          Dog(image: 'assets/images/dog3.jpg', userName: '단추', petBreed: '포메라니안', petAge: 4),
         ];
         isLoading = false;
       });
@@ -77,9 +131,9 @@ class _HomePageState extends State<HomePage> {
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
         topDogs = [
-          Dog(image: 'https://place-puppy.com/250x250', userName: '초코', petBreed: '푸들', petAge: 3),
-          Dog(image: 'https://place-puppy.com/251x251', userName: '복실이', petBreed: '말티즈', petAge: 2),
-          Dog(image: 'https://place-puppy.com/252x252', userName: '단추', petBreed: '시바견', petAge: 4),
+          Dog(image: 'assets/images/dog1.jpg', userName: '초코', petBreed: '포메라니안', petAge: 3),
+          Dog(image: 'assets/images/dog2.jpg', userName: '복실이', petBreed: '포메라니안', petAge: 2),
+          Dog(image: 'assets/images/dog3.jpg', userName: '단추', petBreed: '포메라니안', petAge: 4),
         ];
         isLoading = false;
       });
@@ -96,36 +150,30 @@ class _HomePageState extends State<HomePage> {
   Widget buildDogCard(Dog dog, String rankEmoji) {
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Image.network(
-                  dog.image,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 0,
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Text(rankEmoji),
-              ),
-            ),
-          ],
+        ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: Image.asset( // 또는 Image.network
+            dog.image,
+            width: 120,
+            height: 120,
+            fit: BoxFit.cover,
+          ),
         ),
         const SizedBox(height: 8),
-        Text(dog.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(rankEmoji, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 4),
+            Text(dog.userName,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
         Text('${dog.petBreed}, ${dog.petAge}살'),
       ],
     );
   }
+
 
   Widget featureCard(String emoji, String title, String desc, String route) {
     return GestureDetector(
@@ -150,54 +198,51 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('댕근 홈'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          tooltip: '로그아웃',
-          onPressed: () async {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.remove('userEmail');
-            if (!context.mounted) return;
-            Navigator.pushReplacementNamed(context, '/login');
-          },
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 100,
+              height: 100,
+            ),
+          ],
         ),
-      ],),
+        actions: const [
+          MyAppBarActions(), // 로그인 여부 따라 조건부 렌더링
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '댕근과 함께하는 즐거운 산책',
+              '댕근과 함께 하는 즐거운 산책',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text('내 강아지에게 딱 맞는 산책 친구를 찾아보세요.'),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/find-friend'),
-                  child: const Text('댕근찾기'),
-                ),
-                const SizedBox(width: 12),
-                OutlinedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/register'),
-                  child: const Text('회원가입'),
-                ),
-                const SizedBox(width: 12),
-                // ✅ 로그인 버튼 추가
-                if (userEmail == null)
+            if (userEmail == null)
+              Row(
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.pushNamed(context, '/register'),
+                    child: const Text('회원가입'),
+                  ),
+                  const SizedBox(width: 12),
                   OutlinedButton(
                     onPressed: () => Navigator.pushNamed(context, '/login'),
                     child: const Text('로그인'),
                   ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 32),
             const Text(
               '이달의 인기 댕댕이',
@@ -212,9 +257,12 @@ class _HomePageState extends State<HomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  if (topDogs.length > 1) buildDogCard(topDogs[1], '🥈'),
-                  if (topDogs.isNotEmpty) buildDogCard(topDogs[0], '🥇'),
-                  if (topDogs.length > 2) buildDogCard(topDogs[2], '🥉'),
+                  if (topDogs.length > 1)
+                    Flexible(child: buildDogCard(topDogs[1], '🥈')),
+                  if (topDogs.isNotEmpty)
+                    Flexible(child: buildDogCard(topDogs[0], '🥇')),
+                  if (topDogs.length > 2)
+                    Flexible(child: buildDogCard(topDogs[2], '🥉')),
                 ],
               ),
             const SizedBox(height: 40),
@@ -246,18 +294,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ✅ 더미 페이지들
-class RegisterPage extends StatelessWidget {
-  const RegisterPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('회원가입')),
-      body: const Center(child: Text('여기는 회원가입 페이지입니다')),
-    );
-  }
-}
 
 class FindFriendPage extends StatelessWidget {
   const FindFriendPage({super.key});
@@ -283,29 +319,6 @@ class ExhibitionPage extends StatelessWidget {
   }
 }
 
-class CommunityPage extends StatelessWidget {
-  const CommunityPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('커뮤니티')),
-      body: const Center(child: Text('여기는 커뮤니티 페이지입니다')),
-    );
-  }
-}
-
-class MarketPage extends StatelessWidget {
-  const MarketPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('댕근마켓')),
-      body: const Center(child: Text('여기는 댕근마켓 페이지입니다')),
-    );
-  }
-}
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
