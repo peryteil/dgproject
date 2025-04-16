@@ -47,9 +47,9 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
         ];
         matchedDogs = [
           {
-            'id': '99',
-            'nickname': '두부',
-            'image': '',
+            'id': '2',
+            'nickname': '콩이',
+            'image': 'assets/images/dog5.jpg',
           },
         ];
         loading = false;
@@ -57,9 +57,9 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
     });
   }
 
-  void handleMatch(String id) {
+  void handleMatch(String userName) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('ID $id 선택됨 (더미 매칭 처리)')),
+      SnackBar(content: Text('$userName 선택됨')),
     );
   }
 
@@ -70,8 +70,12 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
   }
 
   void handleDeleteMatch(String id) {
+    setState(() {
+      matchedDogs.removeWhere((dog) => dog['id'] == id);
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('ID $id 매칭 거절 (더미)')),
+      SnackBar(content: Text('ID $id 매칭 거절됨')),
     );
   }
 
@@ -105,7 +109,7 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
             Text('📍 ${profile['location']}'),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => handleMatch(profile['id']),
+              onPressed: () => handleMatch(profile['userName']),
               child: const Text('선택하기'),
             ),
           ],
@@ -116,7 +120,10 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
 
   Widget buildMatchedDogsModal() {
     return AlertDialog(
-      title: Text('매칭된 댕댕이 (${matchedDogs.length})'),
+      title: Text('매칭된 댕댕이 (${matchedDogs.length})',
+        textAlign: TextAlign.center,
+      ),
+
       content: SizedBox(
         height: 300,
         width: double.maxFinite,
@@ -124,20 +131,46 @@ class _FindFriendScreenState extends State<FindFriendScreen> {
           itemCount: matchedDogs.length,
           itemBuilder: (context, index) {
             final dog = matchedDogs[index];
-            return ListTile(
-              leading: const Icon(Icons.pets),
-              title: Text(dog['nickname']),
-              trailing: Wrap(
-                spacing: 8,
+            final String imagePath = dog['image'] != null && dog['image'].toString().isNotEmpty
+                ? 'assets/images/${dog['image']}'
+                : '';
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () => handleChat(dog['id']),
-                    child: const Text('채팅'),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: dog['image'] != null && dog['image'].toString().isNotEmpty
+                        ? Image.asset(
+                      dog['image'],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 50),
+                    )
+                        : const Icon(Icons.pets, size: 50),
                   ),
-                  ElevatedButton(
-                    onPressed: () => handleDeleteMatch(dog['id']),
-                    child: const Text('거절'),
+                  const SizedBox(height: 8),
+                  Text(
+                    dog['nickname'] ?? '이름 없음',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => handleChat(dog['id']),
+                        child: const Text('채팅'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () => handleDeleteMatch(dog['id']),
+                        child: const Text('거절'),
+                      ),
+                    ],
+                  )
                 ],
               ),
             );

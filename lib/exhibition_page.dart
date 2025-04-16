@@ -24,15 +24,15 @@ class _ExhibitionScreenState extends State<ExhibitionScreen> {
       exhibitions = [
         {
           'id': 1,
-          'title': '케이펫페어 세텍',
-          'description': '봄나들이에 딱! 펫 페어!',
-          'startDate': '2025-03-16',
-          'endDate': '2025-04-03',
-          'location': '세텍 학여울역',
-          'image': 'https://d5bvmdkxgb6q.cloudfront.net/wp-content/uploads/2024/12/02113013/25%EC%BC%80%EC%9D%B4%ED%8E%AB%ED%8E%98%EC%96%B4-%EB%A9%94%EA%B0%80%EC%A3%BC-%ED%82%A4%EB%B9%84%EC%A3%BC%EC%96%BC_297X420mm_3.%EC%84%B8%ED%85%8D-1200x1697.jpg',
-          'url': 'https://k-pet.co.kr/information/scheduled-list/2025_kpet_setec/',
+          'title': '스프링 펫페어',
+          'description': '댕댕이와 함께하는 봄여행!',
+          'startDate': '2025-03-01',
+          'endDate': '2025-06-15',
+          'location': '전남 라테라스',
+          'image': 'https://naverbooking-phinf.pstatic.net/20250228_160/1740726776807MYijp_JPEG/laterrace_spring_1000.jpg',
+          'url': 'http://laterrace-resort.com/board/bbs/board.php?bo_table=event_&wr_id=336',
           'status': 'current',
-          'tags': ['건강검진', '영양', '운동'],
+          'tags': ['가든', '산책', '여유'],
         },
         {
           'id': 2,
