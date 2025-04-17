@@ -5,7 +5,6 @@ import 'market_page.dart';
 import 'register_page.dart';
 import 'community_page.dart';
 import 'community_write_page.dart';
-import 'community_detail_page.dart';
 import 'community_edit_page.dart';
 import 'find_friend.dart';
 import 'exhibition_page.dart';
@@ -76,7 +75,6 @@ class MyApp extends StatelessWidget {
         '/exhibition': (context) => const ExhibitionScreen(),
         '/community': (context) => const CommunityPage(),
         '/community/write': (context) => const CommunityWritePage(),
-        '/community/detail': (context) => const CommunityDetailPage(),
         '/community/edit': (context) => const CommunityEditPage(),
         '/market': (context) => MarketPage(),
         '/find': (context) => const FindFriendScreen(),

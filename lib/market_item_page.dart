@@ -2,130 +2,42 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'market_write_page.dart';
 
-class MarketItemPage extends StatelessWidget {
+class MarketItemPage extends StatefulWidget {
   final Map<String, dynamic> product;
   final Function(Map<String, dynamic>)? onUpdate;
   final Function(String)? onDelete;
-  final Function()? onGoBack;
 
   const MarketItemPage({
     super.key,
     required this.product,
     this.onUpdate,
     this.onDelete,
-    this.onGoBack,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final imagePath = product['image'];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(product['title']),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MarketWritePage(
-                    product: product,
-                    onSubmit: (updatedProduct) {
-                      onUpdate?.call(updatedProduct);
-                    },
-                  ),
-                ),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () {
-              if (onDelete != null) {
-                onDelete!(product['id'].toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('상품이 삭제되었습니다.')),
-                );
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            imagePath != null && imagePath != ''
-                ? imagePath.startsWith('images/')
-                ? Image.asset(imagePath)
-                : File(imagePath).existsSync()
-                ? Image.file(File(imagePath))
-                : const Icon(Icons.broken_image, size: 100)
-                : const Icon(Icons.image_not_supported, size: 100),
-            const SizedBox(height: 16),
-            Text(product['title'], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('${product['price']}원'),
-            const SizedBox(height: 8),
-            Text('판매자: ${product['sellerNickname']}'),
-            const SizedBox(height: 8),
-            Text('지역: ${product['location']}'),
-            const SizedBox(height: 8),
-            Text('조회수: ${product['views']}'),
-            const SizedBox(height: 16),
-            Text(product['description']),
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 8),
-            CommentSection(),
-          ],
-        ),
-      ),
-    );
-  }
+  State<MarketItemPage> createState() => _MarketItemPageState();
 }
 
-class CommentSection extends StatefulWidget {
-  const CommentSection({super.key});
-
-  @override
-  State<CommentSection> createState() => _CommentSectionState();
-}
-
-class _CommentSectionState extends State<CommentSection> {
-  List<Map<String, dynamic>> comments = [
-    {
-      "id": 1,
-      "userId": 1,
-      "nickname": "초코아빠",
-      "content": "가격 좀 깎아주세요!",
-      "createdAt": DateTime.now().subtract(Duration(hours: 2)).toString()
-    },
-    {
-      "id": 2,
-      "userId": 2,
-      "nickname": "귤귤이",
-      "content": "연락처 남겨주세요.",
-      "createdAt": DateTime.now().subtract(Duration(hours: 1)).toString()
-    },
-  ];
+class _MarketItemPageState extends State<MarketItemPage> {
+  bool isLiked = false; // 하트 상태
+  List<Map<String, dynamic>> comments = [];
 
   final TextEditingController commentController = TextEditingController();
   final TextEditingController editController = TextEditingController();
-
   final currentUserId = 1;
   int? editingCommentId;
+
+  @override
+  void initState() {
+    super.initState();
+    comments = List<Map<String, dynamic>>.from(widget.product['comments'] ?? []);
+  }
 
   void addComment() {
     if (commentController.text.trim().isEmpty) return;
 
     final newComment = {
-      "id": comments.length + 1,
+      "id": DateTime.now().millisecondsSinceEpoch,
       "userId": currentUserId,
       "nickname": "장원영",
       "content": commentController.text.trim(),
@@ -135,12 +47,14 @@ class _CommentSectionState extends State<CommentSection> {
     setState(() {
       comments.insert(0, newComment);
       commentController.clear();
+      widget.product['comments'] = comments;
     });
   }
 
   void deleteComment(int id) {
     setState(() {
       comments.removeWhere((c) => c['id'] == id);
+      widget.product['comments'] = comments;
     });
   }
 
@@ -160,6 +74,7 @@ class _CommentSectionState extends State<CommentSection> {
         comments[index]['content'] = editController.text.trim();
         editingCommentId = null;
         editController.clear();
+        widget.product['comments'] = comments;
       }
     });
   }
@@ -173,17 +88,99 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = widget.product['image'];
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFDF6FB),
+      appBar: AppBar(
+        title: const Text('댕근마켓',
+          style: TextStyle(fontWeight: FontWeight.bold), ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isLiked ? Icons.favorite : Icons.favorite_border,
+              color: isLiked ? Colors.pinkAccent : null,
+            ),
+            onPressed: () {
+              setState(() {
+                isLiked = !isLiked;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MarketWritePage(
+                    product: widget.product,
+                    onSubmit: (updatedProduct) {
+                      widget.onUpdate?.call(updatedProduct);
+                    },
+                  ),
+                ),
+              );
+              Navigator.pop(context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              widget.onDelete?.call(widget.product['id'].toString());
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            imagePath != null && imagePath != ''
+                ? imagePath.startsWith('images/')
+                ? Image.asset(imagePath)
+                : File(imagePath).existsSync()
+                ? Image.file(File(imagePath))
+                : const Icon(Icons.broken_image, size: 100)
+                : const Icon(Icons.image_not_supported, size: 100),
+            const SizedBox(height: 16),
+            Text(widget.product['title'], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('${widget.product['price']}원', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text('작성자: ${widget.product['sellerNickname']}', style: TextStyle(color: Colors.grey[600],
+                fontWeight: FontWeight.bold)),
+            Text('지역: ${widget.product['location']}', style: TextStyle(color: Colors.grey[600],
+                fontWeight: FontWeight.bold)),
+            const Divider(),
+            const SizedBox(height: 16),
+            Text(widget.product['description']),
+            const SizedBox(height: 80),
+            Text('조회수: ${widget.product['views']}회', style: TextStyle(color: Colors.grey[600],
+                fontWeight: FontWeight.bold)),
+            const Divider(),
+            const SizedBox(height: 8),
+            _buildCommentSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommentSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('댓글', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text('댓글', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
               child: TextField(
                 controller: commentController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: '댓글을 입력하세요',
                   border: OutlineInputBorder(),
                 ),
@@ -192,14 +189,14 @@ class _CommentSectionState extends State<CommentSection> {
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: addComment,
-              child: Text('등록'),
+              child: const Text('등록'),
             ),
           ],
         ),
         const SizedBox(height: 16),
         ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: comments.length,
           itemBuilder: (context, index) {
             final comment = comments[index];
@@ -217,16 +214,16 @@ class _CommentSectionState extends State<CommentSection> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(comment['nickname'], style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(comment['nickname'], style: const TextStyle(fontWeight: FontWeight.bold)),
                         if (isCurrentUser && !isEditing)
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit, size: 20),
+                                icon: const Icon(Icons.edit, size: 20),
                                 onPressed: () => startEditComment(comment),
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete, size: 20),
+                                icon: const Icon(Icons.delete, size: 20),
                                 onPressed: () => deleteComment(comment['id']),
                               ),
                             ],
@@ -241,17 +238,17 @@ class _CommentSectionState extends State<CommentSection> {
                         TextField(
                           controller: editController,
                           autofocus: true,
-                          decoration: InputDecoration(hintText: '댓글 수정'),
+                          decoration: const InputDecoration(hintText: '댓글 수정'),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.check, color: Colors.green),
+                              icon: const Icon(Icons.check, color: Colors.green),
                               onPressed: saveEditedComment,
                             ),
                             IconButton(
-                              icon: Icon(Icons.close, color: Colors.grey),
+                              icon: const Icon(Icons.close, color: Colors.grey),
                               onPressed: cancelEdit,
                             ),
                           ],
@@ -262,7 +259,7 @@ class _CommentSectionState extends State<CommentSection> {
                     const SizedBox(height: 4),
                     Text(
                       comment['createdAt'].substring(11, 16),
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),

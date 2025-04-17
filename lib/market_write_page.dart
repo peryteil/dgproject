@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MarketWritePage extends StatefulWidget {
-  final Function(Map<String, dynamic>) onSubmit;
+  final Function(Map<String, Object>) onSubmit;
   final Map<String, dynamic>? product;
 
   MarketWritePage({required this.onSubmit, this.product});
@@ -54,19 +54,18 @@ class _MarketWritePageState extends State<MarketWritePage> {
       });
 
       try {
-        // 이미지 경로가 유효한지 확인
         String imagePath = '';
         if (images.isNotEmpty) {
-          imagePath = images[0].path; // File 객체에서 경로를 추출
+          imagePath = images[0].path;
         } else if (widget.product?['image'] != null) {
-          imagePath = widget.product!['image']; // 기존 이미지 경로 사용
+          imagePath = widget.product!['image'];
         }
 
         if (imagePath.isEmpty) {
           throw Exception('이미지 경로가 유효하지 않습니다.');
         }
 
-        final updatedProduct = {
+        final Map<String, Object> updatedProduct = {
           'id': widget.product?['id'] ?? DateTime.now().millisecondsSinceEpoch,
           'title': title,
           'price': int.tryParse(price) ?? 0,
@@ -75,13 +74,11 @@ class _MarketWritePageState extends State<MarketWritePage> {
           'sellerNickname': widget.product?['sellerNickname'] ?? '사용자',
           'views': widget.product?['views'] ?? 0,
           'createdAt': widget.product?['createdAt'] ?? DateTime.now().toString(),
-          'image': imagePath, // 유효한 이미지 경로
+          'image': imagePath,
+          'comments': widget.product?['comments'] ?? <Map<String, dynamic>>[],
         };
 
-        print('✅ 등록할 데이터: $updatedProduct');
-
-        // Map<String, dynamic>을 Map<String, Object>로 변환
-        widget.onSubmit(Map<String, Object>.from(updatedProduct));
+        widget.onSubmit(updatedProduct);
 
         setState(() => isSubmitting = false);
         Navigator.pop(context);
@@ -90,7 +87,7 @@ class _MarketWritePageState extends State<MarketWritePage> {
         print(stackTrace);
         setState(() => isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('등록 중 오류가 발생했어요.\n${e.toString()}')),
+          SnackBar(content: Text('등록 중 오류로 인해 성공하지 못했어요.\n${e.toString()}')),
         );
       }
     }
@@ -99,7 +96,10 @@ class _MarketWritePageState extends State<MarketWritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.product != null ? '상품 수정' : '상품 등록')),
+      backgroundColor: const Color(0xFFFDF5F8),
+      appBar: AppBar(
+        title: Text(widget.product != null ? '상품 수정' : '상품 등록'),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(

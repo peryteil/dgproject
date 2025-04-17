@@ -17,11 +17,15 @@ class _CommunityEditPageState extends State<CommunityEditPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final post = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+    final args = ModalRoute.of(context)!.settings.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      setState(() {
+        selectedCategory = args['category'] ?? '자유게시판';
+        title = args['title'] ?? '';
+        content = args['content'] ?? '';
+      });
+    }
 
-    selectedCategory = post['category'] ?? '자유게시판';
-    title = post['title'] ?? '';
-    content = post['content'] ?? '';
   }
 
   @override
