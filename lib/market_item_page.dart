@@ -39,7 +39,7 @@ class _MarketItemPageState extends State<MarketItemPage> {
     final newComment = {
       "id": DateTime.now().millisecondsSinceEpoch,
       "userId": currentUserId,
-      "nickname": "장원영",
+      "nickname": "탄이누나",
       "content": commentController.text.trim(),
       "createdAt": DateTime.now().toString()
     };

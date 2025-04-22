@@ -14,7 +14,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   late Map<String, dynamic> post;
   late List<Map<String, dynamic>> comments;
 
-  final dummyUser = {'nickname': '댕댕이사랑꾼'};
+  final dummyUser = {'nickname': '탄이누나'};
   int? editingIndex;
   final TextEditingController _editingController = TextEditingController();
   final TextEditingController _newCommentController = TextEditingController();

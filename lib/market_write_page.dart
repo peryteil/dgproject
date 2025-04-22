@@ -71,7 +71,7 @@ class _MarketWritePageState extends State<MarketWritePage> {
           'price': int.tryParse(price) ?? 0,
           'description': description,
           'location': widget.product?['location'] ?? '서울',
-          'sellerNickname': widget.product?['sellerNickname'] ?? '사용자',
+          'sellerNickname': widget.product?['sellerNickname'] ?? '탄이누나',
           'views': widget.product?['views'] ?? 0,
           'createdAt': widget.product?['createdAt'] ?? DateTime.now().toString(),
           'image': imagePath,
